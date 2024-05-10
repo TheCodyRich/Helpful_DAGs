@@ -1,3 +1,15 @@
+# USAGE: A simple dag that checks the metadb to ensure it is the only DAG running, then hibernates the deployment if no other dags are running.
+# If there are other dags running the 1st task fails. It will try to run every 5 minuites throughout the night until it can hibernate.  
+# If there are no other dags running the next tasks hibernates the deployment until the OVERRIDE_DATE.  
+#  
+# Update the following parameters
+#     API_TOKEN - Any valid token (including Workspace level)
+#     DEPLOYMENT ID
+#     ORG_ID
+#     OVERRIDE_DATE - The time that you want your deployment to wake back up. Currently set for 7am
+#
+# There are no guarentees or warrenties associated with this DAG
+
 from airflow import DAG
 from airflow import settings
 from airflow.operators.python import PythonOperator
@@ -15,7 +27,7 @@ import requests
 API_TOKEN = os.environ.get("API_TOKEN")
 DEPLOYMENT_ID = os.environ.get("DEPLOYMENT_ID")
 ORG_ID = os.environ.get("ORG_ID")
-OVERRIDE_DATE = (datetime.now() + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%SZ')
+OVERRIDE_DATE = (datetime.now() + timedelta(days=1)).replace(hour=7, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def check_running_dags():
     session = settings.Session()
