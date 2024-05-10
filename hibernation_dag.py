@@ -8,7 +8,7 @@
 #     ORG_ID
 #     OVERRIDE_DATE - The time that you want your deployment to wake back up. Currently set for 7am
 #
-# There are no guarentees or warrenties associated with this DAG
+# There are no guarantees associated with this DAG
 
 from airflow import DAG
 from airflow import settings
