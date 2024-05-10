@@ -68,7 +68,7 @@ dag = DAG(
     'hibernation_dag',
     default_args=default_args,
     description='DAG that checks if other DAGs are running every 5 minutes from 5pm to 7am Monday to Friday',
-    schedule_interval='*/5 17-23,0-7 * * 1-5',  # Every 5 minutes from 5pm to 7am, Monday to Friday
+    schedule_interval='*/5 17-23,0-6 * * 1-5',  # Every 5 minutes from 5pm to 7am, Monday to Friday
     catchup=False,
     max_active_runs=1
 )
