@@ -1,6 +1,5 @@
 from airflow import DAG
 from airflow import settings
-from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.state import State
 from airflow.utils.session import provide_session
