@@ -31,7 +31,6 @@ def check_running_dags():
 
 
 def hibernate_deployments(API_TOKEN,DEPLOYMENT_ID,ORG_ID, OVERRIDE_DATE):
-    print(OVERRIDE_DATE)
     response = requests.post(
         f"https://api.astronomer.io/platform/v1beta1/organizations/{ORG_ID}/deployments/{DEPLOYMENT_ID}/hibernation-override",
         headers={
