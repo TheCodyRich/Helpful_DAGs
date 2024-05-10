@@ -13,7 +13,7 @@ import logging
 import os
 import requests
 
-API_TOKEN = os.environ.get("API_KEY")
+API_TOKEN = os.environ.get("API_TOKEN")
 DEPLOYMENT_ID = os.environ.get("DEPLOYMENT_ID")
 ORG_ID = os.environ.get("ORG_ID")
 OVERRIDE_DATE = (datetime.now() + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%SZ')
