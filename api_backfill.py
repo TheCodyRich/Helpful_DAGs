@@ -39,7 +39,7 @@ from airflow.models import Param
         "deployment_url": Param(
             type="string",
             description="Astro Deployment URL",
-            default="https://clvv1pwr9089901qkuqz5vgl4.astronomer.run/d675lyym"
+            default="https://abcde12345.astronomer.run/codyrich"
         ),
         "token": Param(
             type="string",
