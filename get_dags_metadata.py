@@ -75,7 +75,7 @@ with DAG(
         'get_dags_metadata',
         default_args=default_args,
         description='A simple DAG to get info about all DAGs',
-        schedule_interval='@daily',
+        schedule_interval=None,
         catchup=False,
 ) as dag:
     get_dags_info_task = PythonOperator(
