@@ -32,7 +32,6 @@ def get_dags_info():
     for dag in dags:
         dag_id = dag['dag_id']
         dag_status = dag['is_paused']
-        print(f'dag_id:{dag_id}')
 
         # Get tasks for each DAG
         tasks_url = f'{BASE_URL}dags/{dag_id}/tasks'
@@ -41,14 +40,12 @@ def get_dags_info():
         tasks_response.raise_for_status()
         tasks = tasks_response.json()['tasks']
         task_ids = [task['task_id'] for task in tasks]
-        print(f'Task_IDs: {task_ids}')
 
         # Get last DAG run info
         dag_runs_url = f'{BASE_URL}dags/{dag_id}/dagRuns'
         dag_runs_response = airflow_request(dag_runs_url)
         dag_runs_response.raise_for_status()
         dag_runs = dag_runs_response.json()['dag_runs']
-        print(f'Dag Runs: {dag_runs}')
         if dag_runs:
             last_dag_run = dag_runs[-1]
             last_start_time = last_dag_run['start_date']
