@@ -11,7 +11,7 @@ from airflow.providers.opsgenie.operators.opsgenie import OpsgenieCreateAlertOpe
 
 def get_formatted_message(**context):
     # Retrieve parameters from the DAG conf
-    dag_run = coclearntext.get('dag_run')
+    dag_run = context.get('dag_run')
     message = dag_run.conf.get('message', 'No specific reason provided')
     dag_name = dag_run.conf.get('dagName', 'Unknown DAG')
     # Format the message
