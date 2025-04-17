@@ -10,89 +10,91 @@ default_args = {
     'start_date': days_ago(1),
 }
 
+@provide_session
+def run_raw_query(start_date_str, end_date_str, session=None, **kwargs):
+    start_date = pendulum.parse(start_date_str).in_timezone("UTC")
+    end_date = pendulum.parse(end_date_str).in_timezone("UTC")
+
+    raw_sql = """
+        SELECT 
+            SUM(EXTRACT(EPOCH FROM (end_date - start_date)) / 60) AS total_duration_minutes
+        FROM 
+            task_instance
+        WHERE 
+            start_date >= :start_date
+            AND end_date < :end_date
+            AND end_date IS NOT NULL
+            AND start_date IS NOT NULL;
+    """
+
+    result = session.execute(
+        raw_sql,
+        {
+            "start_date": start_date,
+            "end_date": end_date,
+        },
+    ).scalar()
+
+    print(f"Total task duration (minutes) from {start_date_str} to {end_date_str}: {result}")
+    return result
+
+def calculate_average(**kwargs):
+    ti = kwargs['ti']
+    task_ids = kwargs['params']['task_ids']
+
+    # Pull values from all specified tasks at once
+    durations = ti.xcom_pull(task_ids=task_ids)
+
+    # Filter out None results, just in case
+    durations = [d for d in durations if d is not None]
+
+    avg = sum(durations) / len(durations) if durations else None
+    print(f"Average task duration: {avg}")
+    return avg
+
 with DAG(
-    dag_id='remote_worker_sizing_dag',
+    dag_id='metadb_last_3_months_avg',
     default_args=default_args,
     schedule_interval=None,
     catchup=False,
-    description='Run raw SQL against MetaDB to compute task duration',
-    tags=['metadb', 'raw_sql'],
+    description='Dynamically calculate task durations for last 3 complete months',
+    tags=['metadb', 'dynamic', 'raw_sql'],
 ) as dag:
 
-    @provide_session
-    def run_raw_query(start_date_str, end_date_str, session=None, **kwargs):
-        start_date = pendulum.parse(start_date_str).in_timezone("UTC")
-        end_date = pendulum.parse(end_date_str).in_timezone("UTC")
+    now = pendulum.now("UTC")
+    first_of_this_month = now.start_of("month")
 
-        raw_sql = """
-            SELECT 
-                SUM(EXTRACT(EPOCH FROM (end_date - start_date)) / 60) AS total_duration_minutes
-            FROM 
-                task_instance
-            WHERE 
-                start_date >= :start_date
-                AND end_date < :end_date
-                AND end_date IS NOT NULL
-                AND start_date IS NOT NULL;
-        """
+    month_ranges = [
+        (
+            first_of_this_month.subtract(months=i+1).to_date_string(),
+            first_of_this_month.subtract(months=i).to_date_string()
+        )
+        for i in reversed(range(3))
+    ]
 
-        result = session.execute(
-            raw_sql,
-            {
-                "start_date": start_date,
-                "end_date": end_date,
+    monthly_tasks = []
+    task_ids = []
+
+    for start, end in month_ranges:
+        label = pendulum.parse(start).format('MMMM')
+        task_id = f"task_{label}"
+        task_ids.append(task_id)
+
+        task = PythonOperator(
+            task_id=task_id,
+            python_callable=run_raw_query,
+            op_kwargs={
+                "start_date_str": start,
+                "end_date_str": end,
             },
-        ).scalar()
+        )
+        monthly_tasks.append(task)
 
-        print(f"Total task duration (minutes) from {start_date_str} to {end_date_str}: {result}")
-        return result
-
-    def calculate_average(**kwargs):
-        ti = kwargs['ti']
-        jan = ti.xcom_pull(task_ids='January')
-        feb = ti.xcom_pull(task_ids='February')
-        mar = ti.xcom_pull(task_ids='March')
-
-        durations = [val for val in [jan, feb, mar] if val is not None]
-        if not durations:
-            avg = None
-        else:
-            avg = sum(durations) / len(durations)
-
-        print(f"Average task duration across January, February, and March: {avg}")
-        return avg
-
-    January = PythonOperator(
-        task_id='January',
-        python_callable=run_raw_query,
-        op_kwargs={
-            "start_date_str": "2025-01-01",
-            "end_date_str": "2025-01-31",
-        },
-    )
-
-    February = PythonOperator(
-        task_id='February',
-        python_callable=run_raw_query,
-        op_kwargs={
-            "start_date_str": "2025-02-01",
-            "end_date_str": "2025-02-28",
-        },
-    )
-
-    March = PythonOperator(
-        task_id='March',
-        python_callable=run_raw_query,
-        op_kwargs={
-            "start_date_str": "2025-03-01",
-            "end_date_str": "2025-03-31",
-        },
-    )
-
-    Calculate_Average = PythonOperator(
-        task_id='Calculate_Average',
+    avg_task = PythonOperator(
+        task_id='calculate_average',
         python_callable=calculate_average,
         provide_context=True,
+        params={'task_ids': task_ids},
     )
 
-    [January, February, March] >> Calculate_Average
+    monthly_tasks >> avg_task
