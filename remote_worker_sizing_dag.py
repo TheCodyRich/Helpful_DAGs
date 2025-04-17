@@ -53,7 +53,7 @@ def calculate_average(**kwargs):
     return avg
 
 with DAG(
-    dag_id='metadb_last_3_months_avg',
+    dag_id='remote_worker_sizing_dag',
     default_args=default_args,
     schedule_interval=None,
     catchup=False,
