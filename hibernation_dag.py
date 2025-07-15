@@ -1,6 +1,8 @@
 # USAGE: A simple dag that checks the metadb to ensure it is the only DAG running, then hibernates the deployment if no other dags are running.
 # If there are other dags running the 1st task fails. It will try to run every 5 minuites throughout the night until it can hibernate.  
 # If there are no other dags running the next tasks hibernates the deployment until the OVERRIDE_DATE.  
+# 
+#  WARNING: This DAG is incompatible with Airflow 3.0+
 #  
 # Update the following parameters
 #     API_TOKEN - Any valid token (including Workspace level)
