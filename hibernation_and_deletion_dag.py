@@ -1,3 +1,16 @@
+# USAGE: This dag runs daily and automates the hibernation of development Astro deployments and deletion of non-development deployments. 
+# Any deployments that do not have hibernation enabled will be deleted unless they contain "_dnd" or "-dnd" at the end of their 
+# deployment name (ex: "test_deployment_dnd"). Adjust the dag schedule to adjust the time of automatic hibernation and deletion.
+# 
+#  
+# Update the following parameters
+#     ORGANIZATION_ID
+#     ASTRO_API_TOKEN
+#     WOKRPSACE_ID
+#    
+# There are no guarantees associated with this DAG
+
+
 import logging
 from datetime import timedelta
 from airflow.operators.python import get_current_context
@@ -9,9 +22,9 @@ from airflow.models import Variable
 
 
 def get_organization_workspace_and_token():
-    organization_id = "cl17wsdpe084o0rw3e46g3smn"  # example: cl17wsdpe08233o0ghhj3e76
+    organization_id = "<CHANGE_HERE>"  # example: cl17wsdpe08233o0ghhj3e76
     astro_api_token = Variable.get("AUTH_TOKEN") # org level token
-    workspace_id = "cm7f419mg0no001jhunzjeer1"  # example: cp305ign4si445i565n5
+    workspace_id = "<CHANGE_HERE>"  # example: cp305ign4si445i565n5
     return organization_id, workspace_id, astro_api_token
 
 
