@@ -1,3 +1,5 @@
+# DEPRECATED!!!   Only to be used on Airflow2
+#
 # USAGE: A simple dag that allows users to run a backfill but tilizes the Airflow API rathar than the CLI so the 
 #  scheduler and it's rules are not ignored.
 #  
