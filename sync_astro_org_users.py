@@ -12,11 +12,18 @@ Teams synced before workspaces due to role inheritance.
 Deployment roles synced last since they reference deployments in
 workspaces that must already exist in the copy org.)
 
-Unmatched workspaces/deployments are skipped.
-Teams/workspaces/deployments matched by name.
+Unmatched workspaces/deployments are skipped. This includes workspaces in both
+the Master and the Copy Org.
+
+Note: Teams/workspaces/deployments matched by name and must match exactly.
 
 ### Required Environment Variables
 - MASTER_ORG_ID, COPY_ORG_ID, MASTER_API_TOKEN, COPY_API_TOKEN
+
+### Required packages
+requests>=2.28.0
+
+Note:  There are no guarantees or warranties associated with this DAG.  It is for use at the user's own risk
 """
 
 import os
